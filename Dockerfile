@@ -21,4 +21,4 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
 ENV PYTHONUNBUFFERED=1
 
 # アプリケーションの実行
-CMD ["python", "main.py"]
+CMD ["/app/.venv/bin/python", "main.py"]
