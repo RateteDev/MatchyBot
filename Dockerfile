@@ -8,18 +8,14 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# uvのインストールとPythonのセットアップ
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# 依存関係のファイルをコピー
-COPY pyproject.toml uv.lock ./
-
-# uvを使用してパッケージをインストール
-RUN uv sync
-RUN uv pip install -e .
-
-# アプリケーションのソースコードをコピー
+# コピー
 COPY . .
+
+# uvのインストールとPythonのセットアップ
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    export PATH="$HOME/.local/bin:$PATH" && \
+    uv sync && \
+    uv pip install -e .
 
 # 環境変数の設定
 ENV PYTHONUNBUFFERED=1
