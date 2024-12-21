@@ -1,16 +1,18 @@
 # Matchybot
 
-## install 
+OWのカスタムマッチをする際に自動でチームの振り分けを行ってくれるボット
 
-### Prerequisite
+## Install
+
+**Prerequisite**
 
 - git
 - uv
 
 > [!NOTE]
-> uv install : https://docs.astral.sh/uv/getting-started/installation/#standalone-installer
+> uv install here : https://docs.astral.sh/uv/getting-started/installation/#standalone-installer
 
-### Install
+**Script**
 
 ```bash
 # Clone this repository
@@ -25,7 +27,7 @@ uv pip install -e .
 cp .env.sample .env
 ```
 
-## run
+## Run
 
 > [!IMPORTANT]
 > Don't forget set the environment variables in the `.env` file, before running the bot
