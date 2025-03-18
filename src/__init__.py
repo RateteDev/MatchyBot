@@ -1,0 +1,3 @@
+"""
+MatchyBot package
+"""
