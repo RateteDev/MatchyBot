@@ -16,26 +16,24 @@ class MyDiscordBot(discord.Client):
         self.tree = app_commands.CommandTree(self)
         self.player_data_manager : PlayerDataManager = player_data_manager
 
+    # ボットの初期化時に1度だけ呼ばれる
+    async def setup_hook(self) -> None:
+        """初期設定とコマンドの同期を行う"""
+        # コマンドを登録
+        self.setup_commands()
+        # グローバルにコマンドを同期
+        try:
+            await self.tree.sync()
+            logger.info("Synced global commands")
+        except discord.errors.HTTPException as e:
+            logger.error(f"Failed to sync commands: {e}")
+
+    # ボットが起動したときの処理(再接続でも呼ばれる)
     async def on_ready(self):
         logger.info(f"Logged in as {self.user}")
-        await self.send_command_menu()
 
-    async def send_command_menu(self):
-        # 登録チャンネルにメッセージを送信
-        bot_channel : discord.TextChannel | None = self.get_channel(int(os.getenv("COMMAND_MENU_CHANNEL")))
-
-        # チャンネルが見つからない場合
-        if not bot_channel:
-            logger.error(f"Bot channel not found: ENV_COMMAND_MENU_CHANNEL={os.getenv('COMMAND_MENU_CHANNEL')}")
-            self.close()
-            return
-
-        # 既存のメッセージを確認・削除
-        async for message in bot_channel.history(limit=100):
-            if message.author == self.user:
-                await message.delete()
-                logger.debug(f"Deleted bot message: {message.id}")
-        
+    # コマンドメニューを表示する機能
+    async def send_command_menu(self, interaction: discord.Interaction):
         # embedの作成
         embed = discord.Embed(
             title="コマンドメニュー",
@@ -45,15 +43,25 @@ class MyDiscordBot(discord.Client):
 
         # 新しいメッセージを送信
         view = CommandMenuView(bot=self)
-        await bot_channel.send(
+        await interaction.response.send_message(
             embed=embed,
             view=view
         )
 
-def setup_bot():
+    # コマンドメニューを表示するコマンドを追加
+    def setup_commands(self):
+        # コマンドを登録
+        menu_command = app_commands.Command(
+            name="menu",
+            description="コマンドメニューを表示します",
+            callback=self.send_command_menu
+        )
+        self.tree.add_command(menu_command)
+
+def setup_bot() -> MyDiscordBot:
     # インテントの設定
     intents = discord.Intents.all()
-    
+
     # データマネージャーの設定
     player_data_manager = PlayerDataManager(file_path="data/players.json")
     player_data_manager.load_data()
@@ -63,5 +71,5 @@ def setup_bot():
         intents=intents,
         player_data_manager=player_data_manager,
     )
-    
-    return bot, os.getenv("TOKEN")
+
+    return bot
